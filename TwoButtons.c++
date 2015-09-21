@@ -82,23 +82,20 @@ int buttons_eval (int m, int n) {
                     }
                     continue;
                 }
+                // skip on if this won't grow us a better solution
+                if (cur.second + 1 >= cnt) {
+                    continue;
+                }
                 if (cur.first*2 >= m) {
                     int tmp = cur.second+1+(cur.first*2-m);
-                    //cout << "got tmp " << tmp << endl;
-                    // is this a new smallest count?
                     if (cnt > tmp) {
                         cnt = tmp;
                     }
                 } else {
-                    if (cur.second+1 < cnt) {
-                        buttonQ.push(pair<int,int>(cur.first*2,cur.second+1));
-                    }
+                    buttonQ.push(pair<int,int>(cur.first*2,cur.second+1));
                 }
                 if (cur.first > 1) {
-                    if (cur.second+1 < cnt) {
-                        buttonQ.push(pair<int,int>(cur.first-1,cur.second+1));
-                        //cout << "pushed blue button " << cur.first - 1 << endl;
-                    }
+                    buttonQ.push(pair<int,int>(cur.first-1,cur.second+1));
                 }
             }
         }
