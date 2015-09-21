@@ -5,6 +5,7 @@
 #include <cstring> // std::strcmp, std::strcpy
 #include <sstream>  // istringstream
 #include <queue>
+#include <limits>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ void buttons_solve (istream& r, ostream& w) {
 
 int buttons_eval (int m, int n) {
     queue<pair<int,int>> buttonQ;
-    int cnt = -1;
+    int cnt = std::numeric_limits<int>::max();
     int max_iter = 100000;
     //cout << "buttons_eval:m:" << m << " n:" << n << endl;
     if (n >= m) {
@@ -76,7 +77,7 @@ int buttons_eval (int m, int n) {
                 buttonQ.pop();
                 if (cur.first == m) {
                     // is this the smallest count found so far
-                    if (cnt == -1 || cnt > cur.second) {
+                    if (cnt > cur.second) {
                         cnt = cur.second;
                     }
                     continue;
@@ -85,16 +86,16 @@ int buttons_eval (int m, int n) {
                     int tmp = cur.second+1+(cur.first*2-m);
                     //cout << "got tmp " << tmp << endl;
                     // is this a new smallest count?
-                    if (cnt == -1 || cnt > tmp) {
+                    if (cnt > tmp) {
                         cnt = tmp;
                     }
                 } else {
-                    if (cnt == -1 || cur.second+1 < cnt) {
+                    if (cur.second+1 < cnt) {
                         buttonQ.push(pair<int,int>(cur.first*2,cur.second+1));
                     }
                 }
                 if (cur.first > 1) {
-                    if (cnt == -1 || cur.second+1 < cnt) {
+                    if (cur.second+1 < cnt) {
                         buttonQ.push(pair<int,int>(cur.first-1,cur.second+1));
                         //cout << "pushed blue button " << cur.first - 1 << endl;
                     }
