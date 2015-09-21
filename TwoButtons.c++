@@ -90,6 +90,8 @@ int buttons_eval (int m, int n) {
                     int tmp = cur.second+1+(cur.first*2-m);
                     if (cnt > tmp) {
                         cnt = tmp;
+                    } else {
+                         continue;
                     }
                 } else {
                     buttonQ.push(pair<int,int>(cur.first*2,cur.second+1));
