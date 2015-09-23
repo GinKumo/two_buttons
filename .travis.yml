@@ -36,7 +36,7 @@ before_script:
 
 script:
     - date
-    - CXXFLAGS="-DNO_builtin_ctz=1" make test
+    - CXXFLAGS="-DNO_builtin_ctz=1 -DNO_builtin_popcount=1 -DNO_builtin_clz=1" make test
 
 after_failure:
-    - cat TestKitayutasGift.tmp
+    - cat TestTwoButtons.tmp

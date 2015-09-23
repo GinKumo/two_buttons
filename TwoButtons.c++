@@ -28,6 +28,40 @@ static int ctz(int v) {  // find the number of trailing zeros in 32-bit v
 }
 #endif /* __GNUC__ */
 
+
+#if defined(__GNUC__) && !defined(NO_builtin_clz)
+#define clz __builtin_clz
+#else /* if we don't have GNUC then use this pretty quick implementation */
+
+#define clz nlz2
+// from http://www.hackersdelight.org/hdcodetxt/nlz.c.txt
+int nlz2(unsigned x) {
+   unsigned y;
+   int n;
+
+   n = 32;
+   y = x >>16;  if (y != 0) {n = n -16;  x = y;}
+   y = x >> 8;  if (y != 0) {n = n - 8;  x = y;}
+   y = x >> 4;  if (y != 0) {n = n - 4;  x = y;}
+   y = x >> 2;  if (y != 0) {n = n - 2;  x = y;}
+   y = x >> 1;  if (y != 0) return n - 2;
+   return n - x;
+}
+#endif /* __GNUC__ */
+
+#if defined(__GNUC__) && !defined(NO_builtin_popcount)
+#define popcount __builtin_popcount
+#else /* if we don't have GNUC then use this pretty quick implementation */
+
+// from http://graphics.stanford.edu/~seander/bithacks.html
+int popcount(unsigned v) {
+    v = v - ((v >> 1) & 0x55555555);                    // reuse input as temporary
+    v = (v & 0x33333333) + ((v >> 2) & 0x33333333);     // temp
+    return ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24; // count
+}
+#endif /* __GNUC__ */
+
+
 // ------------
 // buttons_read
 // ------------
@@ -59,58 +93,30 @@ void buttons_solve (istream& r, ostream& w) {
 // buttons_eval
 // ------------
 
-int buttons_eval (int m, int n) {
-    queue<pair<int,int>> buttonQ;
-    int cnt = std::numeric_limits<int>::max();
-    int max_iter = 100000;
-    //cout << "buttons_eval:m:" << m << " n:" << n << endl;
+int buttons_eval (int m, int n)
+{
+    int cnt = 0;
     if (n >= m) {
-        // push subtract button until n decreases to m
-        cnt = n-m;
-    } else {
-        buttonQ.push(std::pair<int,int>(n,0));
-        while (max_iter && !buttonQ.empty()) {
-            max_iter--;
-            int l = buttonQ.size();
-            while (l--) {
-                pair<int,int> cur = buttonQ.front();
-                buttonQ.pop();
-                if (cur.first == m) {
-                    // is this the smallest count found so far
-                    if (cnt > cur.second) {
-                        cnt = cur.second;
-                    }
-                    continue;
-                }
-                // skip on if this won't grow us a better solution
-                if (cur.second + 1 >= cnt) {
-                    continue;
-                }
-                if (cur.first*2 >= m) {
-                    int tmp = cur.second+1+(cur.first*2-m);
-                    if (cnt > tmp) {
-                        cnt = tmp;
-                    } else {
-                         continue;
-                    }
-                } else {
-                    buttonQ.push(pair<int,int>(cur.first*2,cur.second+1));
-                }
-                if (cur.first > 1) {
-                    buttonQ.push(pair<int,int>(cur.first-1,cur.second+1));
-                }
-            }
-        }
+        return n-m;
     }
-    /* Debug */
-    if (!buttonQ.empty()) {
-        int l = buttonQ.size();
-        while (l--) {
-            pair<int,int> cur = buttonQ.front();
-            buttonQ.pop();
-            cout << "(" << cur.first << ", " << cur.second << ")" << endl;
-        }
+
+    int nn = n;
+    int sh = 0;
+
+    sh = clz(nn)-clz(m);
+    nn <<= sh;
+    if (nn < m) {
+        nn <<= 1;
+        ++sh;
     }
-    return cnt;
+
+    if (nn == m) {
+        return sh;
+    }
+
+    cnt = n-(m >> sh);
+    m -= ((m>>(sh+1))-1)<<(sh+1);
+
+    return sh+cnt-1+__builtin_popcount( (((m>>(sh))+1)<<sh)-m);
 }
 
