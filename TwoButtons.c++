@@ -96,6 +96,8 @@ void buttons_solve (istream& r, ostream& w) {
 int buttons_eval (int m, int n)
 {
     int cnt = 0;
+
+    // check for easy case where we just subtract n-m times
     if (n >= m) {
         return n-m;
     }
@@ -103,20 +105,25 @@ int buttons_eval (int m, int n)
     int nn = n;
     int sh = 0;
 
+    // how much do I need to shift n to match msb bits
     sh = clz(nn)-clz(m);
     nn <<= sh;
+    // did we get lucky, and just shifting n up matches m
+    if (nn == m) {
+        return sh;
+    }
+    // if we happen to match, but shifted n isn't larger, then shift one more
     if (nn < m) {
         nn <<= 1;
         ++sh;
     }
+    // how many early subtracts to make the msbs match, but leave one off so we are larger
+    // if we don't leave one off then future subtracts will cause us to get too small
+    cnt = n-(m >> sh) - 1;
 
-    if (nn == m) {
-        return sh;
-    }
+    // here if we add cnt the problem is reduced to m=m n=(m>>(sh))+1
 
-    cnt = n-(m >> sh);
-    m -= ((m>>(sh+1))-1)<<(sh+1);
-
-    return sh+cnt-1+__builtin_popcount( (((m>>(sh))+1)<<sh)-m);
+    // add initial subtracts and overall shifts needed, now count remaining number of subtract
+    return sh+cnt+__builtin_popcount( (((m>>(sh))+1)<<sh)-m);
 }
 
