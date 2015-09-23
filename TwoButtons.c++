@@ -124,6 +124,6 @@ int buttons_eval (int m, int n)
     // here if we add cnt the problem is reduced to m=m n=(m>>(sh))+1
 
     // add initial subtracts and overall shifts needed, now count remaining number of subtract
-    return sh+cnt+__builtin_popcount( (((m>>(sh))+1)<<sh)-m);
+    return sh+cnt+popcount( (((m>>(sh))+1)<<sh)-m);
 }
 
